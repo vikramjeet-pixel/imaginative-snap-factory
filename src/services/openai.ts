@@ -8,6 +8,7 @@ export interface ImageGenerationParams {
   quality?: 'standard' | 'hd';
   style?: 'vivid' | 'natural';
   apiKey: string;
+  model?: string;
 }
 
 export interface GeneratedImage {
@@ -20,9 +21,10 @@ export const generateImage = async ({
   prompt,
   n = 1,
   size = '1024x1024',
-  quality = 'standard',
+  quality = 'hd',
   style = 'vivid',
-  apiKey
+  apiKey,
+  model = 'dall-e-3'
 }: ImageGenerationParams): Promise<GeneratedImage | null> => {
   if (!apiKey) {
     toast.error("Please provide an OpenAI API key");
@@ -34,6 +36,9 @@ export const generateImage = async ({
     return null;
   }
 
+  // Enhance the prompt for better results
+  const enhancedPrompt = `High quality, detailed image of: ${prompt}`;
+
   try {
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
@@ -42,7 +47,8 @@ export const generateImage = async ({
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        prompt,
+        model,
+        prompt: enhancedPrompt,
         n,
         size,
         quality,
@@ -52,6 +58,7 @@ export const generateImage = async ({
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.error('OpenAI API error:', errorData);
       throw new Error(errorData.error?.message || 'Failed to generate image');
     }
 
