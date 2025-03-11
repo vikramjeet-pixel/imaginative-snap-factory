@@ -76,7 +76,7 @@ const Index = () => {
           <div className="flex flex-col items-center text-center">
             <div className="flex items-center gap-2 mb-2">
               <SparklesIcon className="h-6 w-6 text-primary animate-pulse-subtle" />
-              <h1 className="text-2xl font-bold tracking-tight">AI Image Generator</h1>
+              <h1 className="text-2xl font-bold tracking-tight">Vikramjeet Singh</h1>
             </div>
             <p className="text-muted-foreground max-w-md">
               Create stunning images with DALL-E AI by describing what you want to see
@@ -254,7 +254,7 @@ const Index = () => {
       <footer className="w-full border-t border-border/40 bg-background/80 backdrop-blur-sm py-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-sm text-muted-foreground">
-            AI Image Generator using DALL-E | Images are generated via OpenAI's API
+            Vikramjeet Singh | AI Image Generator using DALL-E
           </p>
         </div>
       </footer>
