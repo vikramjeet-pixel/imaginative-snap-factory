@@ -19,16 +19,13 @@ const ImageDisplay = ({ image, onDelete }: ImageDisplayProps) => {
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(image.url);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      // Create a temporary anchor element
       const link = document.createElement('a');
-      link.href = url;
-      link.download = `dalle-image-${new Date(image.timestamp).toISOString().slice(0, 10)}.png`;
+      link.href = image.url;
+      link.download = `vikramjeet-dalle-image-${new Date(image.timestamp).toISOString().slice(0, 10)}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
       toast.success('Image downloaded successfully');
     } catch (error) {
       toast.error('Failed to download image');
