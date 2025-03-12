@@ -1,12 +1,11 @@
-
-import { useState, useEffect } from 'react';
-import { Download, Trash2, EyeIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
-import { GeneratedImage } from '@/services/openai';
-import { deleteGeneratedImage } from '@/services/localStorage';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { useState, useEffect } from "react";
+import { Download, Trash2, EyeIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { GeneratedImage } from "@/services/openai";
+import { deleteGeneratedImage } from "@/services/localStorage";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 interface ImageDisplayProps {
   image: GeneratedImage;
@@ -20,16 +19,18 @@ const ImageDisplay = ({ image, onDelete }: ImageDisplayProps) => {
   const handleDownload = async () => {
     try {
       // Create a temporary anchor element
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = image.url;
-      link.download = `vikramjeet-dalle-image-${new Date(image.timestamp).toISOString().slice(0, 10)}.png`;
+      link.download = `vikramjeet-dalle-image-${new Date(image.timestamp)
+        .toISOString()
+        .slice(0, 10)}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success('Image downloaded successfully');
+      toast.success("Image downloaded successfully");
     } catch (error) {
-      toast.error('Failed to download image');
-      console.error('Download error:', error);
+      toast.error("Failed to download image");
+      console.error("Download error:", error);
     }
   };
 
@@ -37,20 +38,23 @@ const ImageDisplay = ({ image, onDelete }: ImageDisplayProps) => {
     if (image.timestamp) {
       deleteGeneratedImage(image.timestamp);
       if (onDelete) onDelete();
-      toast.success('Image deleted');
+      toast.success("Image deleted");
     }
   };
 
-  const formattedDate = new Date(image.timestamp).toLocaleDateString(undefined, {
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  const formattedDate = new Date(image.timestamp).toLocaleDateString(
+    undefined,
+    {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+  );
 
   return (
-    <div 
+    <div
       className="relative rounded-xl overflow-hidden bg-black/5 animate-fade-in border border-border/50 shadow-sm group"
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
@@ -71,10 +75,10 @@ const ImageDisplay = ({ image, onDelete }: ImageDisplayProps) => {
           )}
           onLoad={() => setLoaded(true)}
         />
-        
+
         <Dialog>
           <DialogTrigger asChild>
-            <button 
+            <button
               className={cn(
                 "absolute top-2 right-2 p-2 rounded-full bg-black/20 backdrop-blur-sm text-white transition-opacity",
                 showControls ? "opacity-100" : "opacity-0",
@@ -88,9 +92,9 @@ const ImageDisplay = ({ image, onDelete }: ImageDisplayProps) => {
             <div className="p-6 bg-background">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="bg-black rounded-lg overflow-hidden">
-                  <img 
-                    src={image.url} 
-                    alt={image.prompt} 
+                  <img
+                    src={image.url}
+                    alt={image.prompt}
                     className="w-full h-auto object-contain"
                   />
                 </div>
@@ -104,11 +108,19 @@ const ImageDisplay = ({ image, onDelete }: ImageDisplayProps) => {
                     <p className="text-muted-foreground">{formattedDate}</p>
                   </div>
                   <div className="flex space-x-2 mt-auto">
-                    <Button onClick={handleDownload} variant="outline" className="flex-1">
+                    <Button
+                      onClick={handleDownload}
+                      variant="outline"
+                      className="flex-1"
+                    >
                       <Download className="mr-2 h-4 w-4" />
                       Download
                     </Button>
-                    <Button onClick={handleDelete} variant="destructive" className="flex-1">
+                    <Button
+                      onClick={handleDelete}
+                      variant="destructive"
+                      className="flex-1"
+                    >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete
                     </Button>
@@ -119,13 +131,17 @@ const ImageDisplay = ({ image, onDelete }: ImageDisplayProps) => {
           </DialogContent>
         </Dialog>
       </div>
-      
+
       <div className="p-3">
-        <p className="text-sm font-medium text-foreground truncate">{formattedDate}</p>
-        <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{image.prompt}</p>
+        <p className="text-sm font-medium text-foreground truncate">
+          {formattedDate}
+        </p>
+        <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+          {image.prompt}
+        </p>
       </div>
-      
-      <div 
+
+      <div
         className={cn(
           "absolute bottom-0 left-0 right-0 p-3 flex justify-between bg-gradient-to-t from-background/90 to-transparent",
           "transition-opacity duration-200",
@@ -135,7 +151,12 @@ const ImageDisplay = ({ image, onDelete }: ImageDisplayProps) => {
         <Button size="sm" variant="outline" onClick={handleDownload}>
           <Download className="h-4 w-4" />
         </Button>
-        <Button size="sm" variant="outline" className="text-destructive" onClick={handleDelete}>
+        <Button
+          size="sm"
+          variant="outline"
+          className="text-destructive"
+          onClick={handleDelete}
+        >
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
