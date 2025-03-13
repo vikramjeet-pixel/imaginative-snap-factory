@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Download, Trash2, EyeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,18 +16,39 @@ interface ImageDisplayProps {
 const ImageDisplay = ({ image, onDelete }: ImageDisplayProps) => {
   const [loaded, setLoaded] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    // Reset states when image changes
+    setLoaded(false);
+    setImageError(false);
+  }, [image.url]);
 
   const handleDownload = async () => {
     try {
+      // Fetch the image first to ensure it's accessible
+      const response = await fetch(image.url);
+      
+      if (!response.ok) {
+        throw new Error("Could not access image");
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
       // Create a temporary anchor element
       const link = document.createElement("a");
-      link.href = image.url;
+      link.href = url;
       link.download = `vikramjeet-dalle-image-${new Date(image.timestamp)
         .toISOString()
         .slice(0, 10)}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      // Clean up the URL object
+      window.URL.revokeObjectURL(url);
+      
       toast.success("Image downloaded successfully");
     } catch (error) {
       toast.error("Failed to download image");
@@ -40,6 +62,12 @@ const ImageDisplay = ({ image, onDelete }: ImageDisplayProps) => {
       if (onDelete) onDelete();
       toast.success("Image deleted");
     }
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
+    setLoaded(true); // Still mark as loaded to remove the loading spinner
+    console.error("Failed to load image:", image.url);
   };
 
   const formattedDate = new Date(image.timestamp).toLocaleDateString(
@@ -60,21 +88,31 @@ const ImageDisplay = ({ image, onDelete }: ImageDisplayProps) => {
       onMouseLeave={() => setShowControls(false)}
     >
       <div className="relative aspect-square overflow-hidden bg-muted">
-        {!loaded && (
+        {!loaded && !imageError && (
           <div className="absolute inset-0 flex items-center justify-center bg-muted">
             <div className="h-8 w-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
           </div>
         )}
-        <img
-          src={image.url}
-          alt={image.prompt}
-          className={cn(
-            "w-full h-full object-cover transition-all duration-500",
-            !loaded && "opacity-0",
-            loaded && "opacity-100"
-          )}
-          onLoad={() => setLoaded(true)}
-        />
+        
+        {imageError ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted p-4 text-center">
+            <EyeIcon className="h-8 w-8 text-muted-foreground mb-2" />
+            <p className="text-sm text-muted-foreground">Image unavailable</p>
+            <p className="text-xs text-muted-foreground mt-1">The image could not be loaded</p>
+          </div>
+        ) : (
+          <img
+            src={image.url}
+            alt={image.prompt}
+            className={cn(
+              "w-full h-full object-cover transition-all duration-500",
+              !loaded && "opacity-0",
+              loaded && "opacity-100"
+            )}
+            onLoad={() => setLoaded(true)}
+            onError={handleImageError}
+          />
+        )}
 
         <Dialog>
           <DialogTrigger asChild>
@@ -84,6 +122,7 @@ const ImageDisplay = ({ image, onDelete }: ImageDisplayProps) => {
                 showControls ? "opacity-100" : "opacity-0",
                 "hover:bg-black/40"
               )}
+              disabled={imageError}
             >
               <EyeIcon className="h-4 w-4" />
             </button>
@@ -92,11 +131,19 @@ const ImageDisplay = ({ image, onDelete }: ImageDisplayProps) => {
             <div className="p-6 bg-background">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="bg-black rounded-lg overflow-hidden">
-                  <img
-                    src={image.url}
-                    alt={image.prompt}
-                    className="w-full h-auto object-contain"
-                  />
+                  {imageError ? (
+                    <div className="aspect-square flex flex-col items-center justify-center bg-muted p-4 text-center">
+                      <EyeIcon className="h-12 w-12 text-muted-foreground mb-3" />
+                      <p className="text-muted-foreground">Image unavailable</p>
+                    </div>
+                  ) : (
+                    <img
+                      src={image.url}
+                      alt={image.prompt}
+                      className="w-full h-auto object-contain"
+                      onError={handleImageError}
+                    />
+                  )}
                 </div>
                 <div className="flex flex-col space-y-4">
                   <div>
@@ -112,6 +159,7 @@ const ImageDisplay = ({ image, onDelete }: ImageDisplayProps) => {
                       onClick={handleDownload}
                       variant="outline"
                       className="flex-1"
+                      disabled={imageError}
                     >
                       <Download className="mr-2 h-4 w-4" />
                       Download
@@ -148,7 +196,7 @@ const ImageDisplay = ({ image, onDelete }: ImageDisplayProps) => {
           showControls ? "opacity-100" : "opacity-0"
         )}
       >
-        <Button size="sm" variant="outline" onClick={handleDownload}>
+        <Button size="sm" variant="outline" onClick={handleDownload} disabled={imageError}>
           <Download className="h-4 w-4" />
         </Button>
         <Button
